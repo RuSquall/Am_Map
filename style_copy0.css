@@ -1,0 +1,92 @@
+html, body{
+    min-height : 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+#mapwrap{position:relative;overflow:hidden;}
+.category, .category *{margin:0 auto;padding:0;color:#000;}   
+.category {position:absolute;overflow:hidden;top:90%;width:100vw;height:15vh;z-index:10;font-family:'Malgun Gothic','맑은 고딕',sans-serif;font-size:12px;text-align:center;background-color:#fff;margin-left:1vw;margin-right:1vw;}
+.category .menu_selected {background:#ff5a5a;color:#fff;border-left:1px solid #915B2F;border-right:1px solid #915B2F;margin:0 auto;} 
+.category li{list-style:none;float:left;width:14vw;height:20vh;padding-top:5px;cursor:pointer;} 
+.category .ico_comm {display:block;background-position: center;margin:0 auto 2px;width:100%;height:15vh;background:url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/category.png') no-repeat; margin:0 auto;} 
+.category .ico_Korean {background-image: url('/static/img/Korean_ca.png') no-repeat;background-position-x:center;margin:0 auto;}
+.category .ico_Chinese {background-position:-10px -36px;background-position-x:center;margin:0 auto;}
+.category .ico_Japanese {background-position:-10px -72px;background-position-x:center;margin:0 auto;}
+.category .ico_Western {background-position:-10px -72px;background-position-x:center;margin:0 auto;}
+.category .ico_Cafe {background-position:-10px -72px;background-position-x:center;margin:0 auto;} 
+.category .ico_Play {background-position:-10px -72px;background-position-x:center;margin:0 auto;} 
+.category .ico_Store {background-position:-10px -72px;background-position-x:center;margin:0 auto;} 
+
+
+/*인포*/
+.wrap {position: absolute;left: 0;bottom: 40px;width: 288px;height: 132px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 12px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
+.wrap * {padding: 0;margin: 0;}
+.wrap .info {width: 286px;height: 120px;border-radius: 5px;border-bottom: 2px solid #ccc;border-right: 1px solid #ccc;overflow: hidden;background: #fff;}
+.wrap .info:nth-child(1) {border: 0;box-shadow: 0px 1px 2px #888;}
+.info .title {padding: 5px 0 0 10px;height: 30px;background: #eee;border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold;}
+.info .close {position: absolute;top: 10px;right: 10px;color: #888;width: 17px;height: 17px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png');}
+.info .close:hover {cursor: pointer;}
+.info .body {position: relative;overflow: hidden;}
+.info .desc {position: relative;margin: 13px 0 0 90px;height: 75px;}
+.desc .ellipsis {overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.desc .jibun {font-size: 11px;color: #888;margin-top: -2px;}
+.info .img {position: absolute;top: 6px;left: 5px;width: 73px;height: 71px;border: 1px solid #ddd;color: #888;overflow: hidden;}
+.info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
+.info .link {color: #5085BB;}
+
+button {
+width: 12.5vw;
+aspect-ratio: 1;
+display: grid;
+place-items: center;
+padding: 0;
+scale: 1;
+background: #ffd3d3;
+border: 0;
+border-radius: 50%;
+transition: background 0.2s;
+cursor: pointer;
+}
+
+.bt{
+    list-style:none;
+    float:left;
+}
+.controls {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 1rem;
+  color: hsl(0 0% 98%);
+  accent-color: hsl(0 0% 100%);
+}
+
+
+
+/*
+.under_btn{
+    position: absolute;
+    top: 95%;
+    z-index: 2;
+    cursor: pointer;
+    outline: 0;
+    color: #fff;
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: center;
+    border: 1px solid transparent;
+    padding: 6px 12px;
+    font-size: 16px;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    :hover {
+        color: #fff;
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+}*/

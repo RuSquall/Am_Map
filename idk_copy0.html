@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="../static/style_copy0.css?after" rel="stylesheet" type="text/css"/>
+    <meta charset="utf-8">
+    <title>ggm</title>
+</head>
+<body>
+<div id="mapwrap"> 
+    <!-- 지도가 표시될 div -->
+    <div id="map" style="width:100vw;height:85vh;"></div>
+    <!-- 지도 위에 표시될 마커 카테고리 -->
+    <div class="category" style="background-color:transparent;">
+        <ul>
+            <li>
+                <button id="KoreanMenu" class="ico_comm ico_Korean" style="background-image:url('/static/img/Korean_ca.png'); background-repeat:no-repeat; background-position:center;" onclick="changeMarker('Korean')">
+                </button>
+            </li>
+            <li>
+                <button id="ChineseMenu" class="ico_comm ico_Chinese" onclick="changeMarker('Chinese')">
+                </button>
+            </li>
+            <li>
+                <button id="JapaneseMenu" class="ico_comm ico_Japanese" onclick="changeMarker('Japanese')">
+                </button>
+            </li>
+            <li>
+                <button id="WesternMenu" class="ico_comm ico_Western" onclick="changeMarker('Western')">
+                </button>
+            </li>
+            <li>
+                <button id="CafeMenu" class="ico_comm ico_Cafe" onclick="changeMarker('Cafe')">
+                </button>
+            </li>
+            <li>
+                <button id="PlayMenu" class="ico_comm ico_Play" onclick="changeMarker('Play')">
+                </button>
+            </li>
+            <li>
+                <button id="StoreMenu" class="ico_comm ico_Store" onclick="changeMarker('Store')">
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=71737a2fe8f61e59071569bee18038b8"></script>
+<script>
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div  
+        mapOption = { 
+            center: new kakao.maps.LatLng(37.616481, 127.768057), // 지도의 중심좌표 양덕원
+            level: 2 // 지도의 확대 레벨 
+        }; 
+
+    var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+
+    // 한식 마커가 표시될 좌표 배열입니다
+    var KoreanPositions = [ 
+        new kakao.maps.LatLng(37.613901, 127.768101), //내 고향 막국수
+        new kakao.maps.LatLng(37.612801,127.768845), // 항아리
+        new kakao.maps.LatLng(37.616199, 127.768874), // 수정 닭갈비
+        new kakao.maps.LatLng(37.616571, 127.768591) // 처가집 콩부자
+    ];
+    // 중식 마커가 표시될 좌표 배열입니다
+    var ChinesePositions = [
+        new kakao.maps.LatLng(37.617465, 127.768133) // 정선생
+    ];
+    // 일식 마커가 표시될 좌표 배열입니다
+    var JapanesePositions = [
+        new kakao.maps.LatLng(37.617434, 127.768156) //가산팔복초밥                   
+    ];    
+    // 양식 마커가 표시될 좌표 배열입니다
+    var WesternPositions = [
+        new kakao.maps.LatLng(37.613901, 127.768101), //내 고향 막국수
+        new kakao.maps.LatLng(37.612801,127.768845), // 항아리
+        new kakao.maps.LatLng(37.616571, 127.768591) // 처가집 콩부자              
+    ];    
+    // 카페 마커가 표시될 좌표 배열입니다
+    var CafePositions = [
+        new kakao.maps.LatLng(37.613901, 127.768101), //내 고향 막국수
+        new kakao.maps.LatLng(37.616199, 127.768874), // 수정 닭갈비
+        new kakao.maps.LatLng(37.616571, 127.768591) // 처가집 콩부자                
+    ];    
+    // 놀거리 마커가 표시될 좌표 배열입니다
+    var PlayPositions = [
+        new kakao.maps.LatLng(37.613901, 127.768101), //내 고향 막국수
+        new kakao.maps.LatLng(37.616571, 127.768591) // 처가집 콩부자                
+    ];    
+    // 스토어 마커가 표시될 좌표 배열입니다
+    var StorePositions = [
+        new kakao.maps.LatLng(37.612801,127.768845), // 항아리
+        new kakao.maps.LatLng(37.616199, 127.768874), // 수정 닭갈비
+        new kakao.maps.LatLng(37.616571, 127.768591) // 처가집 콩부자                  
+    ];    
+
+    var markerImageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/category.png';  // 마커이미지의 주소입니다. 스프라이트 이미지 입니다
+    var KoreanMarkerImg = '/static/img/food01.png';
+    KoreanMarkers = [], // 한식 마커 객체를 가지고 있을 배열입니다
+    ChineseMarkers = [],
+    JapaneseMarkers = []; 
+    WesternMarkers = [];
+    CafeMarkers = [];
+    PlayMarkers = [];
+    StoreMarkers = [];
+    
+    createKoreanMarkers(); // 한식 마커를 생성하고 한식 마커 배열에 추가합니다
+    createJapaneseMarkers();
+    createChineseMarkers();
+    createWesternMarkers(); 
+    createCafeMarkers(); 
+    createPlayMarkers(); 
+    createStoreMarkers(); 
+    
+    KoreanOverlay = [];
+    ChineseOverlay = [];
+    JapaneseOverlay = [];
+    WesternOverlay = [];
+    CafeOverlay = [];
+    PlayOverlay = [];
+    StoreOverlay = [];
+    
+
+    changeMarker('Korean'); // 지도에 한식 마커가 보이도록 설정합니다    
+
+
+    // 마커이미지의 주소와, 크기, 옵션으로 마커 이미지를 생성하여 리턴하는 함수입니다
+    function createMarkerImage(src, size, options) {
+        var markerImage = new kakao.maps.MarkerImage(src, size, options);
+        return markerImage;            
+    }
+
+    // 좌표와 마커이미지를 받아 마커를 생성하여 리턴하는 함수입니다
+    function createMarker(position, image) {
+        var marker = new kakao.maps.Marker({
+            position: position,
+            image: image
+        });
+
+        return marker;  
+    }   
+
+    // 한식 마커를 생성하고 한식 마커 배열에 추가하는 함수입니다
+    function createKoreanMarkers() {
+
+        for (var i = 0; i < KoreanPositions.length; i++) {  
+
+            var imageSize = new kakao.maps.Size(48, 48),
+                imageOptions = {  
+                    spriteOrigin: new kakao.maps.Point(0, 0),    
+                    spriteSize: new kakao.maps.Size(48, 48)  
+                };     
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(KoreanMarkerImg, imageSize, imageOptions),    
+                marker = createMarker(KoreanPositions[i], markerImage);  
+
+            // 생성된 마커를 커피숍 마커 배열에 추가합니다
+            KoreanMarkers.push(marker);
+        }     
+    }
+    // 한식 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setKoreanMarkers(map) {        
+        for (var i = 0; i < KoreanMarkers.length; i++) {  
+            KoreanMarkers[i].setMap(map);
+        }        
+    }
+    
+    // 중식 마커를 생성하고 중식 마커 배열에 추가하는 함수입니다
+    function createChineseMarkers() {
+        for (var i = 0; i < ChinesePositions.length; i++) {
+
+            var imageSize = new kakao.maps.Size(22, 26),
+                imageOptions = {   
+                    spriteOrigin: new kakao.maps.Point(10, 36),    
+                    spriteSize: new kakao.maps.Size(36, 98)  
+                };       
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),    
+                marker = createMarker(ChinesePositions[i], markerImage);  
+
+            // 생성된 마커를 편의점 마커 배열에 추가합니다
+            ChineseMarkers.push(marker);    
+        }        
+    }
+    // 중식 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setChineseMarkers(map) {        
+        for (var i = 0; i < ChineseMarkers.length; i++) {  
+            ChineseMarkers[i].setMap(map);
+        }        
+    }
+
+    // 일식 마커를 생성하고 일식 마커 배열에 추가하는 함수입니다
+    function createJapaneseMarkers() {
+        for (var i = 0; i < JapanesePositions.length; i++) {
+
+            var imageSize = new kakao.maps.Size(22, 26),
+                imageOptions = {   
+                    spriteOrigin: new kakao.maps.Point(10, 72),    
+                    spriteSize: new kakao.maps.Size(36, 98)  
+                };       
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),    
+                marker = createMarker(JapanesePositions[i], markerImage);  
+
+            // 생성된 마커를 일식 마커 배열에 추가합니다
+            JapaneseMarkers.push(marker);        
+        }                
+    }
+    // 일식 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setJapaneseMarkers(map) {        
+        for (var i = 0; i < JapaneseMarkers.length; i++) {  
+            JapaneseMarkers[i].setMap(map);
+        }        
+    }
+    
+    // 양식 마커를 생성하고 양식 마커 배열에 추가하는 함수입니다
+    function createWesternMarkers() {
+
+        for (var i = 0; i < WesternPositions.length; i++) {  
+
+            var imageSize = new kakao.maps.Size(22, 26),
+                imageOptions = {  
+                    spriteOrigin: new kakao.maps.Point(10, 0),    
+                    spriteSize: new kakao.maps.Size(36, 98)  
+                };     
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),    
+                marker = createMarker(WesternPositions[i], markerImage);  
+
+            // 생성된 마커를 양식 마커 배열에 추가합니다
+            WesternMarkers.push(marker);
+        }     
+    }
+    // 양식 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setWesternMarkers(map) {        
+        for (var i = 0; i < WesternMarkers.length; i++) {  
+            WesternMarkers[i].setMap(map);
+        }        
+    }
+    
+    // 커피숍 마커를 생성하고 커피숍 마커 배열에 추가하는 함수입니다
+    function createCafeMarkers() {
+
+        for (var i = 0; i < CafePositions.length; i++) {  
+
+            var imageSize = new kakao.maps.Size(22, 26),
+                imageOptions = {  
+                    spriteOrigin: new kakao.maps.Point(10, 0),    
+                    spriteSize: new kakao.maps.Size(36, 98)  
+                };     
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),    
+                marker = createMarker(CafePositions[i], markerImage);  
+
+            // 생성된 마커를 커피숍 마커 배열에 추가합니다
+            CafeMarkers.push(marker);
+        }     
+    }
+    // 카페 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setCafeMarkers(map) {        
+        for (var i = 0; i < CafeMarkers.length; i++) {  
+            CafeMarkers[i].setMap(map);
+        }        
+    }
+    
+    // 놀거리 마커를 생성하고 놀거리 마커 배열에 추가하는 함수입니다
+    function createPlayMarkers() {
+
+        for (var i = 0; i < PlayPositions.length; i++) {  
+
+            var imageSize = new kakao.maps.Size(22, 26),
+                imageOptions = {  
+                    spriteOrigin: new kakao.maps.Point(10, 0),    
+                    spriteSize: new kakao.maps.Size(36, 98)  
+                };     
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),    
+                marker = createMarker(PlayPositions[i], markerImage);  
+
+            // 생성된 마커를 놀거리 마커 배열에 추가합니다
+            PlayMarkers.push(marker);
+        }     
+    }
+    // 놀거리 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setPlayMarkers(map) {        
+        for (var i = 0; i < PlayMarkers.length; i++) {  
+            PlayMarkers[i].setMap(map);
+        }        
+    }
+    
+    // 스토어 마커를 생성하고 스토어 마커 배열에 추가하는 함수입니다
+    function createStoreMarkers() {
+
+        for (var i = 0; i < StorePositions.length; i++) {  
+
+            var imageSize = new kakao.maps.Size(22, 26),
+                imageOptions = {  
+                    spriteOrigin: new kakao.maps.Point(10, 0),    
+                    spriteSize: new kakao.maps.Size(36, 98)  
+                };     
+
+            // 마커이미지와 마커를 생성합니다
+            var markerImage = createMarkerImage(markerImageSrc, imageSize, imageOptions),    
+                marker = createMarker(StorePositions[i], markerImage);  
+
+            // 생성된 마커를 커피숍 마커 배열에 추가합니다
+            StoreMarkers.push(marker);
+        }     
+    }
+    // 스토어 마커들의 지도 표시 여부를 설정하는 함수입니다
+    function setStoreMarkers(map) {        
+        for (var i = 0; i < StoreMarkers.length; i++) {  
+            StoreMarkers[i].setMap(map);
+        }        
+    }
+    
+    
+    // 카테고리를 클릭했을 때 type에 따라 카테고리의 스타일과 지도에 표시되는 마커를 변경합니다
+    function changeMarker(type){
+
+        var KoreanMenu = document.getElementById('KoreanMenu');
+        var ChineseMenu = document.getElementById('ChineseMenu');
+        var JapaneseMenu = document.getElementById('JapaneseMenu');
+        var WesternMenu = document.getElementById('WesternMenu');
+        var CafeMenu = document.getElementById('CafeMenu');
+        var PlayMenu = document.getElementById('PlayMenu');
+        var StoreMenu = document.getElementById('StoreMenu');
+
+        // 커피숍 카테고리가 클릭됐을 때
+        if (type === 'Korean') {
+
+            // 커피숍 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = 'menu_selected';
+
+            // 편의점과 주차장 카테고리는 선택되지 않은 스타일로 바꿉니다
+            ChineseMenu.className = '';
+            JapaneseMenu.className = '';
+            WesternMenu.className = '';
+            CafeMenu.className = '';
+            PlayMenu.className = '';
+            StoreMenu.className = '';
+
+            // 커피숍 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(map);
+            setChineseMarkers(null);
+            setJapaneseMarkers(null);  
+            setWesternMarkers(null); 
+            setCafeMarkers(null); 
+            setPlayMarkers(null); 
+            setStoreMarkers(null);
+            
+            allOfOverlayClose();
+
+        } else if (type === 'Chinese') { // 편의점 카테고리가 클릭됐을 때
+
+            // 편의점 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = '';
+            ChineseMenu.className = 'menu_selected';
+            JapaneseMenu.className = '';
+            WesternMenu.className = '';
+            CafeMenu.className = '';
+            PlayMenu.className = '';
+            StoreMenu.className = '';
+
+            // 편의점 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(null);
+            setChineseMarkers(map);
+            setJapaneseMarkers(null);  
+            setWesternMarkers(null); 
+            setCafeMarkers(null); 
+            setPlayMarkers(null); 
+            setStoreMarkers(null);
+            
+            allOfOverlayClose();
+
+        } else if (type === 'Japanese') { // 주차장 카테고리가 클릭됐을 때
+
+            // 주차장 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = '';
+            ChineseMenu.className = '';
+            JapaneseMenu.className = 'menu_selected';
+            WesternMenu.className = '';
+            CafeMenu.className = '';
+            PlayMenu.className = '';
+            StoreMenu.className = '';
+
+            // 주차장 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(null);
+            setChineseMarkers(null);
+            setJapaneseMarkers(map);  
+            setWesternMarkers(null); 
+            setCafeMarkers(null); 
+            setPlayMarkers(null); 
+            setStoreMarkers(null);  
+            
+            allOfOverlayClose();
+            
+        } else if (type === 'Western') { // 주차장 카테고리가 클릭됐을 때
+
+            // 주차장 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = '';
+            ChineseMenu.className = '';
+            JapaneseMenu.className = '';
+            WesternMenu.className = 'menu_selected';
+            CafeMenu.className = '';
+            PlayMenu.className = '';
+            StoreMenu.className = '';
+
+            // 주차장 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(null);
+            setChineseMarkers(null);
+            setJapaneseMarkers(null);  
+            setWesternMarkers(map); 
+            setCafeMarkers(null); 
+            setPlayMarkers(null); 
+            setStoreMarkers(null);
+            
+            allOfOverlayClose();
+            
+        } else if (type === 'Cafe') { // 주차장 카테고리가 클릭됐을 때
+
+            // 주차장 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = '';
+            ChineseMenu.className = '';
+            JapaneseMenu.className = '';
+            WesternMenu.className = '';
+            CafeMenu.className = 'menu_selected';
+            PlayMenu.className = '';
+            StoreMenu.className = '';
+
+            // 주차장 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(null);
+            setChineseMarkers(null);
+            setJapaneseMarkers(null);  
+            setWesternMarkers(null); 
+            setCafeMarkers(map); 
+            setPlayMarkers(null); 
+            setStoreMarkers(null); 
+            
+            allOfOverlayClose();
+                
+        } else if (type === 'Play') { // 주차장 카테고리가 클릭됐을 때
+
+            // 주차장 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = '';
+            ChineseMenu.className = '';
+            JapaneseMenu.className = '';
+            WesternMenu.className = '';
+            CafeMenu.className = '';
+            PlayMenu.className = 'menu_selected';
+            StoreMenu.className = '';
+
+            // 주차장 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(null);
+            setChineseMarkers(null);
+            setJapaneseMarkers(null);  
+            setWesternMarkers(null); 
+            setCafeMarkers(null); 
+            setPlayMarkers(map); 
+            setStoreMarkers(null);
+            
+            allOfOverlayClose();
+               
+        } else if (type === 'Store') { // 주차장 카테고리가 클릭됐을 때
+
+            // 주차장 카테고리를 선택된 스타일로 변경하고
+            KoreanMenu.className = '';
+            ChineseMenu.className = '';
+            JapaneseMenu.className = '';
+            WesternMenu.className = '';
+            CafeMenu.className = '';
+            PlayMenu.className = '';
+            StoreMenu.className = 'menu_selected';
+
+            // 주차장 마커들만 지도에 표시하도록 설정합니다
+            setKoreanMarkers(null);
+            setChineseMarkers(null);
+            setJapaneseMarkers(null);  
+            setWesternMarkers(null); 
+            setCafeMarkers(null); 
+            setPlayMarkers(null); 
+            setStoreMarkers(map); 
+            
+            allOfOverlayClose();
+        }
+    }
+    
+    // 커스텀 오버레이에 표시할 컨텐츠 입니다
+    // 커스텀 오버레이는 아래와 같이 사용자가 자유롭게 컨텐츠를 구성하고 이벤트를 제어할 수 있기 때문에
+    // 별도의 이벤트 메소드를 제공하지 않습니다 
+    var KoreanCont = [
+        ['            내 고향 막국수', '"KoreanOverayClose(0)"'],
+        ['            항아리', '"KoreanOverayClose(1)"'],
+        ['            수정 닭갈비', '"KoreanOverayClose(2)"'],
+        ['            처가집 콩부자', '"KoreanOverayClose(3)"']
+    ];
+    var ChineseCont = [
+        ['            정선생 옛날 짜장', '"ChineseOverayClose(0)"'],
+    ];
+    var JapaneseCont = [
+        ['            가산 팔복 초밥', '"JapaneseOverayClose(0)"'],
+    ];
+    var WesternCont = [
+        ['            내 고향 막국수', '"WesternOverayClose(0)"'],
+        ['            항아리', '"WesternOverayClose(1)"'],
+        ['            처가집 콩부자', '"WesternOverayClose(2)"']
+    ];
+    var CafeCont = [
+        ['            내 고향 막국수', '"CafeOverayClose(0)"'],
+        ['            수정 닭갈비', '"CafeOverayClose(1)"'],
+        ['            처가집 콩부자', '"CafeOverayClose(2)"']
+    ];
+    var PlayCont = [
+        ['            내 고향 막국수', '"PlayOverayClose(0)"'],
+        ['            처가집 콩부자', '"PlayOverayClose(1)"']
+    ];
+    var StoreCont = [
+        ['            항아리', '"StoreOverayClose(0)"'],
+        ['            수정 닭갈비', '"StoreOverayClose(1)"'],
+        ['            처가집 콩부자', '"StoreOverayClose(2)"']
+    ];
+    
+    var KoreanContent = new Array(KoreanPositions.length);
+    var ChineseContent = new Array(ChinesePositions.length);
+    var JapaneseContent = new Array(JapanesePositions.length);
+    var WesternContent = new Array(WesternPositions.length);
+    var CafeContent = new Array(CafePositions.length);
+    var PlayContent = new Array(PlayPositions.length);
+    var StoreContent = new Array(StorePositions.length);
+    
+    for(var i = 0; i < KoreanPositions.length; i++){
+        KoreanContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                KoreanCont[i][0] + 
+                '            <div class="close" onclick=' + KoreanCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    for(var i = 0; i < ChinesePositions.length; i++){
+        ChineseContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                ChineseCont[i][0] + 
+                '            <div class="close" onclick=' + ChineseCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    for(var i = 0; i < JapanesePositions.length; i++){
+        JapaneseContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                JapaneseCont[i][0] + 
+                '            <div class="close" onclick=' + JapaneseCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    for(var i = 0; i < WesternPositions.length; i++){
+        WesternContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                WesternCont[i][0] + 
+                '            <div class="close" onclick=' + WesternCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    for(var i = 0; i < CafePositions.length; i++){
+        CafeContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                CafeCont[i][0] + 
+                '            <div class="close" onclick=' + CafeCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    for(var i = 0; i < PlayPositions.length; i++){
+        PlayContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                PlayCont[i][0] + 
+                '            <div class="close" onclick=' + PlayCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    for(var i = 0; i < StorePositions.length; i++){
+        StoreContent[i] = '<div class="wrap">' + 
+                '    <div class="info">' + 
+                '        <div class="title">' + 
+                StoreCont[i][0] + 
+                '            <div class="close" onclick=' + StoreCont[i][1] + ' title="닫기"></div>' + 
+                '        </div>' + 
+                '        <div class="body">' + 
+                '            <div class="img">' +
+                '                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70">' +
+                '           </div>' + 
+                '            <div class="desc">' + 
+                '                <div class="ellipsis">제주특별자치도 제주시 첨단로 242</div>' + 
+                '                <div class="jibun ellipsis">(우) 63309 (지번) 영평동 2181</div>' + 
+                '                <div><a href="https://www.kakaocorp.com/main" target="_blank" class="link">홈페이지</a></div>' + 
+                '            </div>' + 
+                '        </div>' + 
+                '    </div>' +    
+                '</div>';
+    }
+    // 마커 위에 커스텀오버레이를 표시합니다
+    // 마커를 중심으로 커스텀 오버레이를 표시하기위해 CSS를 이용해 위치를 설정했습니다
+    /*
+    var overlay = new kakao.maps.CustomOverlay({
+        content: content,
+        map: map,
+        position: KoreanMarkers[0].getPosition()
+    });
+
+    // 마커를 클릭했을 때 커스텀 오버레이를 표시합니다
+    kakao.maps.event.addListener(KoreanMarkers[0], 'click', function() {
+        overlay.setMap(map);
+    });
+
+    // 커스텀 오버레이를 닫기 위해 호출되는 함수입니다 
+    function closeOverlay() {
+        overlay.setMap(null);     
+    }
+    overlay.setMap(null);
+    */
+
+    for(var i = 0; i < KoreanPositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: KoreanContent[i],map: map,position: KoreanMarkers[i].getPosition()})
+        KoreanOverlay.push(tmp);
+    }
+    for(var i = 0; i < ChinesePositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: ChineseContent[i],map: map,position: ChineseMarkers[i].getPosition()})
+        ChineseOverlay.push(tmp);
+    }
+    for(var i = 0; i < JapanesePositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: JapaneseContent[i],map: map,position: JapaneseMarkers[i].getPosition()})
+        JapaneseOverlay.push(tmp);
+    }
+    for(var i = 0; i < WesternPositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: WesternContent[i],map: map,position: WesternMarkers[i].getPosition()})
+        WesternOverlay.push(tmp);
+    }
+    for(var i = 0; i < CafePositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: CafeContent[i], map: map, position: CafeMarkers[i].getPosition()})
+        CafeOverlay.push(tmp);
+    }
+    for(var i = 0; i < PlayPositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: PlayContent[i],map: map,position: PlayMarkers[i].getPosition()})
+        PlayOverlay.push(tmp);
+    }
+    for(var i = 0; i < StorePositions.length; i++){
+        var tmp = new kakao.maps.CustomOverlay({content: StoreContent[i],map: map,position: StoreMarkers[i].getPosition()})
+        StoreOverlay.push(tmp);
+    }
+    
+    function KoreanOverayClose(ind) {KoreanOverlay[ind].setMap(null);}
+    function ChineseOverayClose(ind) {ChineseOverlay[ind].setMap(null);}
+    function JapaneseOverayClose(ind) {JapaneseOverlay[ind].setMap(null);}
+    function WesternOverayClose(ind) {WesternOverlay[ind].setMap(null);}
+    function CafeOverayClose(ind) {CafeOverlay[ind].setMap(null);}
+    function PlayOverayClose(ind) {PlayOverlay[ind].setMap(null);}
+    function StoreOverayClose(ind) {StoreOverlay[ind].setMap(null);}
+    
+    //마커를 눌렀을 때 이벤트를 추가하는
+    kakao.maps.event.addListener(KoreanMarkers[0], 'click', function() {allOfOverlayClose(), KoreanOverlay[0].setMap(map);});
+    kakao.maps.event.addListener(KoreanMarkers[1], 'click', function() {allOfOverlayClose(), KoreanOverlay[1].setMap(map);});
+    kakao.maps.event.addListener(KoreanMarkers[2], 'click', function() {allOfOverlayClose(), KoreanOverlay[2].setMap(map);});
+    kakao.maps.event.addListener(KoreanMarkers[3], 'click', function() {allOfOverlayClose(), KoreanOverlay[3].setMap(map);});
+    
+    kakao.maps.event.addListener(ChineseMarkers[0], 'click', function() {allOfOverlayClose(), ChineseOverlay[0].setMap(map);});
+    
+    kakao.maps.event.addListener(JapaneseMarkers[0], 'click', function() {allOfOverlayClose(), JapaneseOverlay[0].setMap(map);});
+    
+    kakao.maps.event.addListener(WesternMarkers[0], 'click', function() {allOfOverlayClose(), WesternOverlay[0].setMap(map);});
+    kakao.maps.event.addListener(WesternMarkers[1], 'click', function() {allOfOverlayClose(), WesternOverlay[1].setMap(map);});
+    kakao.maps.event.addListener(WesternMarkers[2], 'click', function() {allOfOverlayClose(), WesternOverlay[2].setMap(map);});
+    
+    kakao.maps.event.addListener(CafeMarkers[0], 'click', function() {allOfOverlayClose(), CafeOverlay[0].setMap(map);});
+    kakao.maps.event.addListener(CafeMarkers[1], 'click', function() {allOfOverlayClose(), CafeOverlay[1].setMap(map);});
+    kakao.maps.event.addListener(CafeMarkers[2], 'click', function() {allOfOverlayClose(), CafeOverlay[2].setMap(map);});
+    
+    kakao.maps.event.addListener(PlayMarkers[0], 'click', function() {allOfOverlayClose(), PlayOverlay[0].setMap(map);});
+    kakao.maps.event.addListener(PlayMarkers[1], 'click', function() {allOfOverlayClose(), PlayOverlay[1].setMap(map);});
+    
+    kakao.maps.event.addListener(StoreMarkers[0], 'click', function() {allOfOverlayClose(), StoreOverlay[0].setMap(map);});
+    kakao.maps.event.addListener(StoreMarkers[1], 'click', function() {allOfOverlayClose(), StoreOverlay[1].setMap(map);});
+    kakao.maps.event.addListener(StoreMarkers[2], 'click', function() {allOfOverlayClose(), StoreOverlay[2].setMap(map);});
+    
+    //모든 오버레이 닫기(처음 화면을 켰을 때 오버레이 끄기)
+    function allOfOverlayClose(){
+        for(var i = 0; i < KoreanOverlay.length; i++){KoreanOverlay[i].setMap(null);}
+        for(var i = 0; i < ChineseOverlay.length; i++){ChineseOverlay[i].setMap(null);}
+        for(var i = 0; i < JapaneseOverlay.length; i++){JapaneseOverlay[i].setMap(null);}
+        for(var i = 0; i < WesternOverlay.length; i++){WesternOverlay[i].setMap(null);}
+        for(var i = 0; i < CafeOverlay.length; i++){CafeOverlay[i].setMap(null);}
+        for(var i = 0; i < PlayOverlay.length; i++){PlayOverlay[i].setMap(null);}
+        for(var i = 0; i < StoreOverlay.length; i++){StoreOverlay[i].setMap(null);}
+    }
+    allOfOverlayClose();
+</script>
+</body>
+</html>
